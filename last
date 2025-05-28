@@ -1,0 +1,114 @@
+from pathlib import Path
+import zipfile
+
+# Set project paths
+project_name = "hk-deploy-kit"
+base_path = Path(f"/mnt/data/{project_name}")
+src_path = base_path / "src"
+public_path = base_path / "public"
+
+# Create directories
+src_path.mkdir(parents=True, exist_ok=True)
+public_path.mkdir(parents=True, exist_ok=True)
+
+# Define project files
+files = {
+    base_path / "index.html": """<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HelenKella Ops</title>
+    <link rel="icon" href="/favicon.svg" />
+  </head>
+  <body class="bg-gradient-to-br from-black via-fuchsia-900 to-purple-950 text-fuchsia-100">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>""",
+    src_path / "main.jsx": """import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import './styles.css';
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);""",
+    src_path / "App.jsx": """export default function App() {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center px-6">
+      <div className="text-center max-w-3xl bg-black/60 backdrop-blur-md p-10 rounded-3xl border border-fuchsia-600 shadow-xl">
+        <h1 className="text-4xl font-bold text-fuchsia-300 glow mb-6">💖 FEMME MODE: RELATABLE AS HELL</h1>
+        <p className="text-lg text-fuchsia-200 mb-4">This is emotional infrastructure for the overstimulated, the under-nurtured, and the terminally online.</p>
+        <ul className="list-disc list-inside text-left space-y-2 text-fuchsia-300">
+          <li>🩷 Neon blush overlays</li>
+          <li>✨ Sparkles for dopamine loops</li>
+          <li>💅 Drag-mom therapist Bethy</li>
+          <li>🌷 Footer affirmations with bite</li>
+        </ul>
+        <p className="mt-6 italic text-fuchsia-400 text-xl glow">It hugs you <strong>and</strong> hands you a sword.</p>
+      </div>
+    </div>
+  );
+}""",
+    src_path / "styles.css": """@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+.glow {
+  text-shadow: 0 0 8px #e879f9, 0 0 14px #a21caf;
+}""",
+    base_path / "tailwind.config.js": """export default {
+  content: ['./index.html', './src/**/*.{js,jsx}'],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+};""",
+    base_path / "postcss.config.js": """export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+};""",
+    base_path / "package.json": """{
+  "name": "hk-deploy-kit",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.12",
+    "postcss": "^8.4.16",
+    "tailwindcss": "^3.1.8",
+    "vite": "^4.0.0"
+  }
+}""",
+    base_path / "netlify.toml": """[build]
+  command = "npm run build"
+  publish = "dist"
+"""}
+
+# Write each file
+for path, content in files.items():
+    path.write_text(content)
+
+# Create a ZIP file
+zip_path = f"/mnt/data/{project_name}.zip"
+with zipfile.ZipFile(zip_path, 'w') as zipf:
+    for path in base_path.rglob("*"):
+        zipf.write(path, path.relative_to(base_path.parent))
+
+zip_path
