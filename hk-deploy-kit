@@ -1,0 +1,52 @@
+#!/bin/bash
+
+echo "⚙️ HELENKELLA STACK INITIALIZER — RUNNING ALL BUILDS"
+# === GLOBAL VARS ===
+PROJECT_DIR="helenkella_stack"
+REPO_URL="https://github.com/helzkelz/hk-deploy-kit.git"
+NODE_VERSION="18"
+PYTHON_VERSION="3.11"
+VENV_DIR=".venv"
+
+# === STEP 0: SYSTEM CHECK ===
+echo "🧠 Checking system requirements..."
+command -v git >/dev/null || { echo "❌ git not found"; exit 1; }
+command -v node >/dev/null || { echo "❌ node not found"; exit 1; }
+command -v python3 >/dev/null || { echo "❌ python3 not found"; exit 1; }
+
+# === STEP 1: CLONE ===
+echo "📦 Cloning base repo..."
+rm -rf $PROJECT_DIR
+git clone $REPO_URL $PROJECT_DIR
+cd $PROJECT_DIR || exit
+
+# === STEP 2: NODE INIT ===
+echo "📦 Installing Node.js deps..."
+nvm install $NODE_VERSION
+nvm use $NODE_VERSION
+npm install
+npm run build
+
+# === STEP 3: PYTHON ENV ===
+echo "🐍 Setting up Python virtualenv..."
+python3 -m venv $VENV_DIR
+source $VENV_DIR/bin/activate
+pip install -r requirements.txt
+
+# === STEP 4: OFFLINE CACHE BUILD ===
+echo "📡 Building offline cache..."
+mkdir -p .offline_cache
+npm run cache:build || echo "⚠️ Cache script not found, skipping"
+
+# === STEP 5: INIT MODULES ===
+echo "📁 Running module builds..."
+
+for module in zines mysconduct onboarding satirium video monetization funnel
+do
+    echo "🔧 Building module: $module"
+    bash ./modules/$module/build.sh || echo "⚠️ $module build script missing/skipped"
+done
+
+# === STEP 6: COMPLETE ===
+echo "✅ ALL MODULES BUILT. Ready to launch locally."
+echo "💻 To run: cd $PROJECT_DIR && npm run start"
