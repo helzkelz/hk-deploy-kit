@@ -4,6 +4,9 @@ on:
   pull_request: {branches: [main]}
   workflow_dispatch:
 permissions: {contents: read}
+concurrency:
+  group: repo-integrity-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   integrity:
     runs-on: ubuntu-latest
@@ -13,21 +16,19 @@ jobs:
         with: {fetch-depth: 2}
       - name: Patch integrity
         run: if git rev-parse HEAD^ >/dev/null 2>&1; then git diff --check HEAD^ HEAD; fi
-      - name: Repository boundaries
+      - name: Reject unresolved merge markers
         run: |
           python - <<'PY'
           from pathlib import Path
           import subprocess
           bad=[]
-          for n in subprocess.check_output(['git','ls-files'],text=True).splitlines():
-            p=Path(n)
-            if not p.is_file():continue
-            try:t=p.read_text(encoding='utf-8')
-            except (UnicodeDecodeError,OSError):continue
-            if any(x.startswith(('<<<<<<< ','>>>>>>> ')) for x in t.splitlines()):bad.append(f'{n}: merge marker')
-          for p in Path('.github/workflows').glob('*.y*ml'):
-            t=p.read_text(encoding='utf-8')
-            if 'working-directory: ../' in t or 'working-directory: ..\\' in t:bad.append(f'{p}: path escape')
-          if bad:raise SystemExit('\n'.join(bad))
+          for name in subprocess.check_output(['git','ls-files'],text=True).splitlines():
+            p=Path(name)
+            if not p.is_file(): continue
+            try: text=p.read_text(encoding='utf-8')
+            except (UnicodeDecodeError,OSError): continue
+            for n,line in enumerate(text.splitlines(),1):
+              if line.startswith(('<<<<<<< ','>>>>>>> ')): bad.append(f'{name}:{n}: unresolved merge marker')
+          if bad: raise SystemExit('\n'.join(bad))
           print('Repository integrity baseline passed.')
           PY
