@@ -1,41 +1,18 @@
-# Website
+# HK Deploy Kit — Reusable Deployment Lineage
 
-This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
+This repository is a **legacy deployment/tooling source** from earlier HelenKella/HK platform work. It is not a current product, platform authority, or canonical NeuNuc deployment registry.
 
-### Installation
+## Current role
 
-```
-$ yarn
-```
+Preserve reusable static-site/Docusaurus deployment patterns, documentation structure, scripts, CI configuration, and hosting lessons that still have value. Shared deployment standards and release truth should be reconciled into the current NeuNuc infrastructure/release architecture rather than maintained here as a competing source.
 
-### Local Development
+**Status:** REUSABLE DEPLOYMENT LINEAGE / ARCHIVE CANDIDATE AFTER DEPENDENCY CHECK.
 
-```
-$ yarn start
-```
+## Boundary
 
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
+- Current institutional/public positioning does not come from this repository.
+- A working historical build/deploy script does not prove any current domain or hosting target uses it.
+- Verify Pages, DNS, CI, hosting, package, and external references before archive.
+- Harvest useful deployment patterns first; preserve Git history afterward.
 
-### Build
-
-```
-$ yarn build
-```
-
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
-
-### Deployment
-
-Using SSH:
-
-```
-$ USE_SSH=true yarn deploy
-```
-
-Not using SSH:
-
-```
-$ GIT_USER=<Your GitHub username> yarn deploy
-```
-
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+If no current deployment depends on this repository after external-state reconciliation, archive it instead of keeping another generic deployment surface active.
